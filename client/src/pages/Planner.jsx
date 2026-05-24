@@ -1,9 +1,11 @@
+import { useTaskNotifications } from '../hooks/useTaskNotifications'
 import { useState, useEffect } from 'react'
 import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css'
 import api from '../services/api'
 import TaskForm from '../components/planner/TaskForm'
 import TaskList from '../components/planner/TaskList'
+import UpcomingTasks from '../components/planner/UpcomingTasks'
 
 export default function Planner() {
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -88,10 +90,12 @@ export default function Planner() {
   }
 
   const selectedTasks = getTasksForDate(selectedDate)
+  useTaskNotifications(tasks)
 
   return (
     <div className="min-h-screen bg-purple-50 p-6">
       <div className="max-w-4xl mx-auto">
+        <UpcomingTasks tasks={tasks} />
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-medium text-purple-800">Planner</h1>
           <button
