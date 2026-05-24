@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Home from './pages/Home'
+import Planner from './pages/Planner'
 
 const PrivateRoute = ({ children }) => {
   const { user } = useAuth()
@@ -14,6 +15,7 @@ const AppRoutes = () => (
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
     <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
+    <Route path="/planner" element={<PrivateRoute><Planner /></PrivateRoute>} />
   </Routes>
 )
 

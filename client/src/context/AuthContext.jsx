@@ -6,6 +6,7 @@ import {
   signOut,
   onAuthStateChanged
 } from 'firebase/auth'
+import api from '../services/api'
 
 const AuthContext = createContext()
 
@@ -16,8 +17,22 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser)
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        try {
+          const res = await api.post('/auth/firebase-login', {
+            uid: currentUser.uid,
+            email: currentUser.email
+          })
+          localStorage.setItem('token', res.data.token)
+        } catch (err) {
+          console.error('Backend auth error:', err)
+        }
+        setUser(currentUser)
+      } else {
+        localStorage.removeItem('token')
+        setUser(null)
+      }
       setLoading(false)
     })
     return unsubscribe
@@ -29,7 +44,10 @@ export const AuthProvider = ({ children }) => {
   const login = (email, password) =>
     signInWithEmailAndPassword(auth, email, password)
 
-  const logout = () => signOut(auth)
+  const logout = async () => {
+    localStorage.removeItem('token')
+    await signOut(auth)
+  }
 
   return (
     <AuthContext.Provider value={{ user, login, register, logout, loading }}>
