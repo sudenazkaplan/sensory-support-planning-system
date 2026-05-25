@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { MoodProvider } from './context/MoodContext'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Home from './pages/Home'
 import Planner from './pages/Planner'
+import Chat from './pages/Chat'
 
 const PrivateRoute = ({ children }) => {
   const { user } = useAuth()
@@ -16,15 +18,18 @@ const AppRoutes = () => (
     <Route path="/register" element={<Register />} />
     <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
     <Route path="/planner" element={<PrivateRoute><Planner /></PrivateRoute>} />
+    <Route path="/chat" element={<PrivateRoute><Chat /></PrivateRoute>} />
   </Routes>
 )
 
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <MoodProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </MoodProvider>
     </AuthProvider>
   )
 }
