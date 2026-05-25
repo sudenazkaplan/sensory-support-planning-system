@@ -27,44 +27,41 @@ export default function Chat() {
   }, [messages])
 
   const sendMessage = async (text) => {
-    const userMessage = text || input.trim()
-    if (!userMessage || loading) return
+  const userMessage = text || input.trim()
+  if (!userMessage || loading) return
 
-    setInput('')
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }])
-    setLoading(true)
+  setInput('')
+  setMessages(prev => [...prev, { role: 'user', content: userMessage }])
+  setLoading(true)
 
-    try {
-      const res = await api.post('/chat/message', {
-        message: userMessage,
-        sessionId
+  try {
+    const res = await api.post('/chat/message', {
+      message: userMessage,
+      sessionId
+    })
+
+    setSessionId(res.data.sessionId)
+    setMessages(prev => [...prev, {
+      role: 'assistant',
+      content: res.data.reply
+    }])
+
+    // Sentiment backend'den geliyor, dil bağımsız
+    if (res.data.sentiment) {
+      updateMood({
+        score: res.data.sentiment.score,
+        mood: res.data.sentiment.mood
       })
-
-      setSessionId(res.data.sessionId)
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: res.data.reply
-      }])
-
-      // Mood güncelle (sentiment backend'de hesaplanıyor,
-      // burada basit keyword kontrolü yapıyoruz)
-      const lower = userMessage.toLowerCase()
-      if (lower.includes('stress') || lower.includes('overwhelm') ||
-          lower.includes('anxious') || lower.includes('scared')) {
-        updateMood({ score: 2, mood: 'bad' })
-      } else if (lower.includes('happy') || lower.includes('great') ||
-                 lower.includes('good')) {
-        updateMood({ score: 4, mood: 'good' })
-      }
-    } catch (err) {
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'Sorry, something went wrong. Please try again.'
-      }])
-    } finally {
-      setLoading(false)
     }
+  } catch (err) {
+    setMessages(prev => [...prev, {
+      role: 'assistant',
+      content: 'Sorry, something went wrong. Please try again.'
+    }])
+  } finally {
+    setLoading(false)
   }
+}
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {

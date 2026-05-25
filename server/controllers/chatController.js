@@ -11,7 +11,6 @@ exports.sendMessage = async (req, res) => {
       return res.status(400).json({ message: 'Message is required' })
     }
 
-    // Mevcut session'ı bul veya yeni oluştur
     let session = sessionId
       ? await ChatHistory.findById(sessionId)
       : null
@@ -20,36 +19,35 @@ exports.sendMessage = async (req, res) => {
       session = new ChatHistory({ userId: req.userId, messages: [] })
     }
 
-    // Kullanıcı mesajını ekle
     session.messages.push({ role: 'user', content: message })
 
-    // Son 10 mesajı gönder (context için)
     const recentMessages = session.messages
       .slice(-10)
       .map(m => ({ role: m.role, content: m.content }))
 
-    // OpenAI'dan yanıt al
-    const reply = await getChatResponse(recentMessages)
+    // İkisini paralel çalıştır
+    const [reply, sentiment] = await Promise.all([
+      getChatResponse(recentMessages),
+      analyzeSentiment(message)
+    ])
 
-    // Yanıtı ekle
     session.messages.push({ role: 'assistant', content: reply })
     await session.save()
 
-    // Sentiment analizi yap (arka planda)
-    analyzeSentiment(message).then(async (sentiment) => {
-      await MoodLog.create({
-        userId: req.userId,
-        mood: sentiment.mood,
-        score: sentiment.score,
-        note: message.slice(0, 100),
-        date: new Date()
-      })
+    // MoodLog kaydet
+    await MoodLog.create({
+      userId: req.userId,
+      mood: sentiment.mood,
+      score: sentiment.score,
+      note: message.slice(0, 100),
+      date: new Date()
     }).catch(() => {})
 
     res.json({
       reply,
       sessionId: session._id,
-      messageCount: session.messages.length
+      messageCount: session.messages.length,
+      sentiment // frontend'e gönder
     })
   } catch (err) {
     console.error('Chat error:', err)
