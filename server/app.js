@@ -11,6 +11,7 @@ app.use(express.json())
 app.use('/api/auth', require('./routes/auth'))
 app.use('/api/tasks', require('./routes/tasks'))
 app.use('/api/chat', require('./routes/chat'))
+app.use('/api/dashboard', require('./routes/dashboard'))
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' })

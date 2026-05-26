@@ -9,6 +9,7 @@ import Home from './pages/Home'
 import Planner from './pages/Planner'
 import Chat from './pages/Chat'
 import Relax from './pages/Relax'
+import Dashboard from './pages/Dashboard'
 
 const PrivateRoute = ({ children }) => {
   const { user } = useAuth()
@@ -23,6 +24,7 @@ const AppRoutes = () => (
     <Route path="/planner" element={<PrivateRoute><Planner /></PrivateRoute>} />
     <Route path="/chat" element={<PrivateRoute><Chat /></PrivateRoute>} />
     <Route path="/relax" element={<PrivateRoute><Relax /></PrivateRoute>} />
+    <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
   </Routes>
 )
 
